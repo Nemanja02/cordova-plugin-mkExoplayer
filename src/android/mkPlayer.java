@@ -568,6 +568,7 @@ public class mkPlayer{
             MediaSource mediaSource = getMediaSource(uri, bandwidthMeter);
             exoPlayer.prepare(mediaSource);
             play();
+            showToast("xDDDDDD");
         }
         setController(controller);
     }
