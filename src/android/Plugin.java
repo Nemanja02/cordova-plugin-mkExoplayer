@@ -28,6 +28,7 @@ package com.mkalyon.cordova.plugins.mkEXO;
 import android.net.*;
 import org.apache.cordova.*;
 import org.json.*;
+import android.view.ViewGroup;
 
 public class Plugin extends CordovaPlugin {
     private mkPlayer player;
@@ -38,13 +39,16 @@ public class Plugin extends CordovaPlugin {
             final Plugin self = this;
             if (action.equals("show")) {
                 cordova.getActivity().runOnUiThread(new Runnable() {
+                    @Override
                     public void run() {
                         if (self.player != null) {
                             self.player.close();
                         }
                         JSONObject params = data.optJSONObject(0);
                         self.player = new mkPlayer(new Configuration(params), cordova.getActivity(), callbackContext, webView);
-                        self.player.createPlayer();
+                        self.player.createPlayer(webView);
+                        
+                        
                         new CallbackResponse(callbackContext).send(PluginResult.Status.NO_RESULT, true);
                     }
                 });
@@ -269,6 +273,76 @@ public class Plugin extends CordovaPlugin {
                 cordova.getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         self.player.close();
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("resize")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        self.player.resizeDialog(data.optDouble(0),data.optDouble(1),data.optDouble(2),data.optDouble(3));
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("getDuration")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        JSONObject obj = new JSONObject();
+                        try {
+                            obj.putOpt("data", self.player.getDuration());
+                        } catch(JSONException e) {
+                            
+                        }
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, obj, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("getCurrentPosition")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        JSONObject obj = new JSONObject();
+                        try {
+                            obj.putOpt("data", self.player.getCurrentPosition());
+                        } catch(JSONException e) {
+
+                        }
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, obj, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("hidePlayer")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        self.player.hidePlayer(webView);
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("showPlayer")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        self.player.showPlayer(webView);
                         new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
                     }
                 });

@@ -14,41 +14,46 @@
      limitations under the License.
 -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-        android:id="@id/exo_content_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
-
-        <!-- Video surface will be inserted as the first child of the content frame. -->
-        <View android:id="@id/exo_shutter"
+    <RelativeLayout
+    android:id="@+id/player_dialog"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+        <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+            android:id="@id/exo_content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/black"/>
+            android:layout_gravity="top">
 
-        <ImageView android:id="@id/exo_artwork"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY"/>
+            <!-- Video surface will be inserted as the first child of the content frame. -->
+            <View android:id="@id/exo_shutter"
+                android:layout_width="500dp"
+                android:layout_height="500dp"
+                android:background="@android:color/transparent"/>
 
-        <com.google.android.exoplayer2.ui.SubtitleView
-            android:id="@id/exo_subtitles"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            <ImageView android:id="@id/exo_artwork"
+                android:layout_width="500dp"
+                android:layout_height="500dp"
+                android:scaleType="fitXY"/>
+
+            <com.google.android.exoplayer2.ui.SubtitleView
+                android:id="@id/exo_subtitles"
+                android:layout_width="500dp"
+                android:layout_height="500dp"/>
 
 
-    </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+        </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+    </RelativeLayout>
 
     <View android:id="@id/exo_controller_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_width="500dp"
+        android:layout_height="500dp"/>
 
     <ProgressBar
         android:id="@+id/exo_buffering"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_gravity="top"
         android:layout_alignParentTop="true"
         android:paddingTop="0dp"
@@ -59,10 +64,8 @@
 
     <ProgressBar
         android:id="@+id/spinnerVideoDetails"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:indeterminate="true"
         android:visibility="invisible" />
 

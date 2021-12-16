@@ -36,6 +36,7 @@ import java.lang.String;
 import java.util.Calendar;
 import org.json.*;
 import com.squareup.picasso.*;
+import android.widget.FrameLayout.*;
 
 public class LayoutProvider {
     private enum BUTTON { exo_prev, exo_rew, exo_play, exo_pause, exo_ffwd, exo_next }
@@ -43,16 +44,36 @@ public class LayoutProvider {
     public static final int timeZone=0;
     public static FrameLayout getMainLayout(Activity activity) {
         FrameLayout view = new FrameLayout(activity);
-        view.setLayoutParams(new LinearLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
+        view.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.MATCH_PARENT));
         view.setKeepScreenOn(true);
         return view;
     }
 
     public static SimpleExoPlayerView getExoPlayerView(Activity activity, Configuration config) {
         SimpleExoPlayerView view = new SimpleExoPlayerView(activity);
-        view.setLayoutParams(new LinearLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT));
+
+        // VELICINA PLAYERA
+        view.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.MATCH_PARENT));
         if (config.isAspectRatioFillScreen()) {
-            view.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
+            view.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
+        }
+        view.setFastForwardIncrementMs(config.getForwardTimeMs());
+        view.setRewindIncrementMs(config.getRewindTimeMs());
+        view.setShowMultiWindowTimeBar(true);
+        view.setControllerHideOnTouch(true);
+        view.setControllerShowTimeoutMs(config.getHideTimeout());
+        setupController(view, activity, config.getController());
+
+        return view;
+    }
+
+    public static SimpleExoPlayerView getExoPlayerViewResize(Activity activity, Configuration config, double width, double height) {
+        SimpleExoPlayerView view = new SimpleExoPlayerView(activity);
+
+        // VELICINA PLAYERA
+        view.setLayoutParams(new RelativeLayout.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.MATCH_PARENT));
+        if (config.isAspectRatioFillScreen()) {
+            view.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
         }
         view.setFastForwardIncrementMs(config.getForwardTimeMs());
         view.setRewindIncrementMs(config.getRewindTimeMs());
@@ -208,6 +229,10 @@ public class LayoutProvider {
         }
     }
 
+    public static void setPlayerVisibility(SimpleExoPlayerView parentView, Activity activity, boolean visibile) {
+            parentView.setVisibility(visibile ? View.VISIBLE : View.GONE);
+    }
+
     private static View findView(View view, Activity activity, String name) {
         int viewId = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
         return view.findViewById(viewId);
@@ -216,20 +241,17 @@ public class LayoutProvider {
     public static WindowManager.LayoutParams getDialogLayoutParams(Activity activity, Configuration config, Dialog dialog) {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.gravity = Gravity.TOP | Gravity.LEFT;
+        return lp;
+    }
 
-        JSONObject dim = config.getDimensions();
-        if(null == dim) {
-            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-            lp.height = WindowManager.LayoutParams.MATCH_PARENT;
-        }
-        else {
-            DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
-            lp.x = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dim.optInt("x", 0), metrics);
-            lp.y = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dim.optInt("y", 0), metrics);
-            lp.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dim.optInt("width", WindowManager.LayoutParams.MATCH_PARENT), metrics);
-            lp.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dim.optInt("height", WindowManager.LayoutParams.MATCH_PARENT), metrics);
-        }
-
+    public static FrameLayout.LayoutParams resizePlayer(Activity activity, Configuration config, Dialog dialog,double top, double left, double width, double height) {
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) width, (int) height, Gravity.TOP | Gravity.LEFT);
+        lp.setMargins((int) left,(int) top, 0,0);
+        return lp;
+    }
+    public static FrameLayout.LayoutParams getRect() {
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(1920, 1080, Gravity.TOP | Gravity.LEFT);
         return lp;
     }
 }

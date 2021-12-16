@@ -23,7 +23,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-module.exports = {
+ module.exports = {
     show: function (parameters, successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "mkExoPlayer", "show", [parameters]);
     },
@@ -80,5 +80,20 @@ module.exports = {
     },
     close: function (successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "mkExoPlayer", "close", []);
-    }
+    },
+    resize: function (top,left,width,height, successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "resize", [top,left,width,height]);
+    },
+    getDuration: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "getDuration", []);
+    },
+    getCurrentPosition: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "getCurrentPosition", []);
+    },
+    hidePlayer: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "hidePlayer", []);
+    },
+    showPlayer: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "showPlayer", []);
+    },
 };

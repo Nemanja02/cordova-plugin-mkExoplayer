@@ -21,9 +21,8 @@
         <item name="android:padding">@dimen/padding</item>
         <item name="android:layout_marginLeft">@dimen/padding</item>
         <item name="android:layout_marginRight">@dimen/padding</item>
-        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_gravity">left</item>
         <item name="android:adjustViewBounds">true</item>
-        <item name="android:scaleType">centerInside</item>
     </style>
 
     <style name="Exo.Previous">

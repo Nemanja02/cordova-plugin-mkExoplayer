@@ -94,9 +94,12 @@ import java.util.Calendar;
 import java.util.List;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 public class mkPlayer{
     public static final String TAG = "ExoPlayerPlugin";
+    // private exoID = 0;
     private final Activity activity;
     private final CallbackContext callbackContext;
     private final Configuration config;
@@ -120,6 +123,7 @@ public class mkPlayer{
     private boolean transParent;
     private boolean autoStop;
     private int ok=0;
+    private FrameLayout mainLayout;
 
     public mkPlayer(Configuration config, Activity activity, CallbackContext callbackContext, CordovaWebView webView) {
         this.config = config;
@@ -177,7 +181,6 @@ public class mkPlayer{
 
                 case Player.STATE_BUFFERING:
                     if (config.getShowSpinner()) {
-                        //showToast("Loading...!");
                         prgs.setVisibility(View.VISIBLE);
                     }
 
@@ -238,11 +241,11 @@ public class mkPlayer{
             if (mappedTrackInfo != null) {
                 if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_VIDEO)
                         == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-                    showToast("Media includes video tracks, but none are playable by this device");
+                    // showToast("Media includes video tracks, but none are playable by this device");
                 }
                 if (mappedTrackInfo.getTypeSupport(C.TRACK_TYPE_AUDIO)
                         == MappedTrackInfo.RENDERER_SUPPORT_UNSUPPORTED_TRACKS) {
-                    showToast("Media includes audio tracks, but none are playable by this device");
+                    // showToast("Media includes audio tracks, but none are playable by this device");
                 }
             }
 
@@ -374,45 +377,69 @@ public class mkPlayer{
             }
         }
     };
-    public void createPlayer() {
+    public void createPlayer(CordovaWebView webView) {
         if (!config.isAudioOnly()) {
-            createDialog();
+            createDialog(webView);
         }
         preparePlayer(config.getUri());
     }
-    public void createDialog() {
-        dialog = new Dialog(this.activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        dialog.setOnKeyListener(onKeyListener);
-        dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        View decorView = dialog.getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
-        dialog.setCancelable(true);
-        dialog.setOnDismissListener(dismissListener);
+    public void hidePlayer(CordovaWebView webView) {
+        ((ViewGroup) webView.getView().getParent()).findViewById(69420).setVisibility(View.GONE);
+    }
+    public void showPlayer(CordovaWebView webView) {
+        ((ViewGroup) webView.getView().getParent()).findViewById(69420).setVisibility(View.VISIBLE);
+    }
+    public long getDuration() {
+        return exoPlayer.getDuration();
+    }
+    public long getCurrentPosition() {
+        return exoPlayer.getCurrentPosition();
+    }
+    public void resizeDialog(double top, double left, double width, double height) {
+        ((ViewGroup) webView.getView().getParent()).findViewById(69420).setLayoutParams(LayoutProvider.resizePlayer(activity, config, dialog, top,left,width,height));
+        // dialog.getWindow().setAttributes(LayoutProvider.resizePlayer(activity, config, dialog, top,left,width,height));
+    }
+    public void createDialog(CordovaWebView webView) {
+        // dialog = new Dialog(this.activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        // dialog.setOnKeyListener(onKeyListener);
+        // dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
+        // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // View decorView = dialog.getWindow().getDecorView();
+        // int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        //         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        //         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        //         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        //         | View.SYSTEM_UI_FLAG_FULLSCREEN
+        //         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        // decorView.setSystemUiVisibility(uiOptions);
+        // dialog.setCancelable(true);
+        // dialog.setOnDismissListener(dismissListener);
 
-        FrameLayout mainLayout = LayoutProvider.getMainLayout(this.activity);
+        mainLayout = LayoutProvider.getMainLayout(this.activity);
         exoView = LayoutProvider.getExoPlayerView(this.activity, config);
         exoView.setControllerVisibilityListener(playbackControlVisibilityListener);
-
+        LinearLayout bg = new LinearLayout(activity);
+        bg.setLayoutParams(LayoutProvider.getRect());
+        bg.setBackgroundColor(Color.GREEN);
+        // mainLayout.addView(bg);
         mainLayout.addView(exoView);
-        dialog.setContentView(mainLayout);
-        dialog.show();
+        // dialog.setContentView(mainLayout);
+        // dialog.show();
 
-        dialog.getWindow().setAttributes(LayoutProvider.getDialogLayoutParams(activity, config, dialog));
-        exoView.requestFocus();
-        exoView.setOnTouchListener(onTouchListener);
+        // dialog.getWindow().setAttributes(LayoutProvider.getDialogLayoutParams(activity, config, dialog));
+        // exoView.setOnTouchListener(onTouchListener);
 
 
         LayoutProvider.setupController(exoView, activity, config.getController());
         if (!config.getShowBuffering()) {
             LayoutProvider.setBufferingVisibility(exoView, activity, false);
         }
+
+        mainLayout.setId(69420);
+        ((ViewGroup) webView.getView().getParent()).addView(mainLayout, LayoutProvider.resizePlayer(activity, config, dialog, 64, 128, 861, 485));
+
+        webView.getView().setBackgroundColor(Color.TRANSPARENT);
+        ((ViewGroup)webView.getView()).bringToFront();
     }
     private int setupAudio() {
         activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -421,10 +448,8 @@ public class mkPlayer{
     private void preparePlayer(Uri uri) {
 
         int audioFocusResult = setupAudio();
-        String audioFocusString = audioFocusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED ?
-                "AUDIOFOCUS_REQUEST_FAILED" :
-                "AUDIOFOCUS_REQUEST_GRANTED";
-        mclock() ;
+        String audioFocusString = audioFocusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED ? "AUDIOFOCUS_REQUEST_FAILED" : "AUDIOFOCUS_REQUEST_GRANTED";
+        mclock();
         TrackSelection.Factory trackSelectionFactory;
         trackSelectionFactory = new RandomTrackSelection.Factory();
         trackSelector = new DefaultTrackSelector(trackSelectionFactory);
@@ -456,8 +481,7 @@ public class mkPlayer{
 
         }
         else{
-            showToast("Failed to construct mediaSource for " + uri) ;
-            sendError("Failed to construct mediaSource for " + uri);
+
         }
 
     }
@@ -531,7 +555,7 @@ public class mkPlayer{
         }
     }
     public void showToast(String message) {
-        Toast.makeText(activity , message, Toast.LENGTH_LONG).show();
+        // Toast.makeText(activity , message, Toast.LENGTH_LONG).show();
     }
 
     public void mclock(){
@@ -568,7 +592,6 @@ public class mkPlayer{
             MediaSource mediaSource = getMediaSource(uri, bandwidthMeter);
             exoPlayer.prepare(mediaSource);
             play();
-            showToast("xDDDDDD");
         }
         setController(controller);
     }
@@ -741,7 +764,6 @@ public class mkPlayer{
                                 getPlaylist();
                             }
                             else {
-                                showToast("Playlist cannot found...!") ;
                             }
                             break;
                         case 2:
@@ -761,7 +783,7 @@ public class mkPlayer{
                 builder.create();
                 AlertDialog dialog = builder.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                dialog.getWindow().setGravity(Gravity.CENTER);
+                // dialog.getWindow().setGravity(Gravity.CENTER);
 
             }
             else{
@@ -810,7 +832,7 @@ public class mkPlayer{
                 builder.create();
                 AlertDialog dialog = builder.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                dialog.getWindow().setGravity(Gravity.CENTER);
+                // dialog.getWindow().setGravity(Gravity.CENTER);
             }
             else{
                 builder.create().show();
@@ -906,7 +928,7 @@ public class mkPlayer{
                 builder.create();
                 AlertDialog dialog = builder.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                dialog.getWindow().setGravity(Gravity.CENTER);
+                // dialog.getWindow().setGravity(Gravity.CENTER);
             }
             else{
                 builder.create().show();
@@ -970,7 +992,7 @@ public class mkPlayer{
                 builder.create();
                 AlertDialog dialog = builder.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                dialog.getWindow().setGravity(Gravity.CENTER);
+                // dialog.getWindow().setGravity(Gravity.CENTER);
             }
             else{
                 builder.create().show();
@@ -1042,7 +1064,7 @@ public class mkPlayer{
                 builder.create();
                 AlertDialog dialog = builder.show();
                 dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-                dialog.getWindow().setGravity(Gravity.CENTER);
+                // dialog.getWindow().setGravity(Gravity.CENTER);
             }
             else{
                 builder.create().show();
