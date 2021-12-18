@@ -63,7 +63,7 @@ public class Plugin extends CordovaPlugin {
                 cordova.getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         self.player.setStream(Uri.parse(url), controller);
-                        new CallbackResponse(callbackContext).send(PluginResult.Status.NO_RESULT, true);
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, new JSONObject(), true);
                     }
                 });
                 return true;
@@ -192,6 +192,30 @@ public class Plugin extends CordovaPlugin {
                 });
                 return true;
             }
+            else if (action.equals("getSubtitlesList")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        JSONObject obj = self.player.getSubtitlesList();
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, obj, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("getAudiosList")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        JSONObject obj = self.player.getAudiosList();
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, obj, false);
+                    }
+                });
+                return true;
+            }
             else if (action.equals("getAudios")) {
                 if (self.player == null) {
                     return false;
@@ -285,6 +309,30 @@ public class Plugin extends CordovaPlugin {
                 cordova.getActivity().runOnUiThread(new Runnable() {
                     public void run() {
                         self.player.resizeDialog(data.optDouble(0),data.optDouble(1),data.optDouble(2),data.optDouble(3));
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("selectSubtitle")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        self.player.selectSubtitle(data.optInt(0));
+                        new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
+                    }
+                });
+                return true;
+            }
+            else if (action.equals("selectAudio")) {
+                if (self.player == null) {
+                    return false;
+                }
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        self.player.selectAudio(data.optInt(0));
                         new CallbackResponse(callbackContext).send(PluginResult.Status.OK, false);
                     }
                 });

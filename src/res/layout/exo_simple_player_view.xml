@@ -27,8 +27,8 @@
 
             <!-- Video surface will be inserted as the first child of the content frame. -->
             <View android:id="@id/exo_shutter"
-                android:layout_width="500dp"
-                android:layout_height="500dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:background="@android:color/transparent"/>
 
             <ImageView android:id="@id/exo_artwork"
@@ -38,8 +38,8 @@
 
             <com.google.android.exoplayer2.ui.SubtitleView
                 android:id="@id/exo_subtitles"
-                android:layout_width="500dp"
-                android:layout_height="500dp"/>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
 
 
         </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>

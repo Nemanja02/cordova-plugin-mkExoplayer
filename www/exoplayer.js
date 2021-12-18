@@ -96,4 +96,16 @@
     showPlayer: function (successCallback, errorCallback) {
         cordova.exec(successCallback, errorCallback, "mkExoPlayer", "showPlayer", []);
     },
+    getSubtitlesList: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "getSubtitlesList", []);
+    },
+    getAudiosList: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "getAudiosList", []);
+    },
+    selectSubtitle: function (index, successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "selectSubtitle", [index]);
+    },
+    selectAudio: function (index, successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, "mkExoPlayer", "selectSubtitle", [index]);
+    },
 };

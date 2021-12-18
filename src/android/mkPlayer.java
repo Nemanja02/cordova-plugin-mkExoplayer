@@ -397,23 +397,8 @@ public class mkPlayer{
     }
     public void resizeDialog(double top, double left, double width, double height) {
         ((ViewGroup) webView.getView().getParent()).findViewById(69420).setLayoutParams(LayoutProvider.resizePlayer(activity, config, dialog, top,left,width,height));
-        // dialog.getWindow().setAttributes(LayoutProvider.resizePlayer(activity, config, dialog, top,left,width,height));
     }
     public void createDialog(CordovaWebView webView) {
-        // dialog = new Dialog(this.activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
-        // dialog.setOnKeyListener(onKeyListener);
-        // dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
-        // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        // View decorView = dialog.getWindow().getDecorView();
-        // int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        //         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        //         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        //         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        //         | View.SYSTEM_UI_FLAG_FULLSCREEN
-        //         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        // decorView.setSystemUiVisibility(uiOptions);
-        // dialog.setCancelable(true);
-        // dialog.setOnDismissListener(dismissListener);
 
         mainLayout = LayoutProvider.getMainLayout(this.activity);
         exoView = LayoutProvider.getExoPlayerView(this.activity, config);
@@ -423,12 +408,6 @@ public class mkPlayer{
         bg.setBackgroundColor(Color.GREEN);
         // mainLayout.addView(bg);
         mainLayout.addView(exoView);
-        // dialog.setContentView(mainLayout);
-        // dialog.show();
-
-        // dialog.getWindow().setAttributes(LayoutProvider.getDialogLayoutParams(activity, config, dialog));
-        // exoView.setOnTouchListener(onTouchListener);
-
 
         LayoutProvider.setupController(exoView, activity, config.getController());
         if (!config.getShowBuffering()) {
@@ -588,10 +567,14 @@ public class mkPlayer{
     }
     public void setStream(Uri uri, JSONObject controller) {
         if (null != uri && null != exoPlayer) {
+            // exoPlayer.setShutterBackgroundColor(Color.BLACK);
+            exoView.setVisibility(View.GONE);
             DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
             MediaSource mediaSource = getMediaSource(uri, bandwidthMeter);
+            // exoPlayer.clearVideoSurface();
             exoPlayer.prepare(mediaSource);
             play();
+            exoView.setVisibility(View.VISIBLE);
         }
         setController(controller);
     }
@@ -870,6 +853,102 @@ public class mkPlayer{
                 .build()
         );
     }
+
+    public JSONObject getSubtitlesList(){
+        String[] st = new String []{};
+        List<String> list = new ArrayList<String>();
+        JSONObject obj = new JSONObject();
+        MappedTrackInfo mappedTrackInfo = Assertions.checkNotNull(trackSelector.getCurrentMappedTrackInfo());
+        TrackGroupArray mrendererTrackGroups = mappedTrackInfo.getTrackGroups(2);
+        for (int groupIndex = 0; groupIndex < mrendererTrackGroups.length; groupIndex++) {
+            TrackGroup mtrackGroup = mrendererTrackGroups.get(groupIndex);
+            for (int trackIndex = 0; trackIndex < mtrackGroup.length; trackIndex++) {
+                JSONObject track = new JSONObject();
+                Boolean isTrackSupported = mappedTrackInfo.getTrackSupport(2, groupIndex, trackIndex) == RendererCapabilities.FORMAT_HANDLED;
+                String trackName = new DefaultTrackNameProvider(activity.getResources()).getTrackName(mrendererTrackGroups.get(groupIndex).getFormat(trackIndex ));
+                String lang = mtrackGroup.getFormat(trackIndex).language;
+                if(isTrackSupported) {
+                    try {
+                        track.putOpt("trackName", trackName);
+                        track.putOpt("trackIndex", trackIndex);
+                        track.putOpt("lang", lang);
+                        track.putOpt("isTrackSupported", isTrackSupported);
+                        obj.putOpt(String.valueOf(trackIndex), track);
+                    } catch(JSONException e) {
+                        
+                    }
+                }
+            }
+        }
+        return obj;
+    }
+
+    public JSONObject getAudiosList(){
+        JSONObject obj = new JSONObject();
+        String[] st = new String []{};
+        List<String> list = new ArrayList<String>();
+        MappedTrackInfo mappedTrackInfo = Assertions.checkNotNull(trackSelector.getCurrentMappedTrackInfo());
+        TrackGroupArray mrendererTrackGroups = mappedTrackInfo.getTrackGroups(1);
+        for (int groupIndex = 0; groupIndex < mrendererTrackGroups.length; groupIndex++) {
+            TrackGroup mtrackGroup = mrendererTrackGroups.get(groupIndex);
+            for (int trackIndex = 0; trackIndex < mtrackGroup.length; trackIndex++) {
+                JSONObject track = new JSONObject();
+                Boolean isTrackSupported = mappedTrackInfo.getTrackSupport(1, groupIndex, trackIndex) == RendererCapabilities.FORMAT_HANDLED;
+                String trackName = new DefaultTrackNameProvider(activity.getResources()).getTrackName(mrendererTrackGroups.get(groupIndex).getFormat(trackIndex ));
+                String lang = mtrackGroup.getFormat(trackIndex).language;
+                if(isTrackSupported) {
+                    try {
+                        track.putOpt("trackName", trackName);
+                        track.putOpt("trackIndex", trackIndex);
+                        track.putOpt("lang", lang);
+                        track.putOpt("isTrackSupported", isTrackSupported);
+                        obj.putOpt(String.valueOf(trackIndex), track);
+                    } catch(JSONException e) {
+                        
+                    }
+                }
+            }
+        }
+        return obj;
+    }
+
+
+    public void selectSubtitle(int index) {
+        TrackGroupArray trackGroups = trackSelector.getCurrentMappedTrackInfo().getTrackGroups(2);
+        DefaultTrackSelector.ParametersBuilder parametersBuilder = trackSelector.buildUponParameters();
+
+        if(index == -1){
+            offSubTitle();
+        }
+        else {
+            onSubTitle();
+            DefaultTrackSelector.SelectionOverride override = new DefaultTrackSelector.SelectionOverride(index, 0);
+            boolean isDisabled = trackSelector.getParameters().getRendererDisabled(2);
+            parametersBuilder.setRendererDisabled(2, isDisabled);
+            if (override != null) {
+                parametersBuilder.setSelectionOverride(2, trackGroups, override);
+            } else {
+                parametersBuilder.clearSelectionOverrides(2);
+            }
+            trackSelector.setParameters(parametersBuilder);
+        }
+    }
+
+    public void selectAudio(int index) {
+        TrackGroupArray trackGroups = trackSelector.getCurrentMappedTrackInfo().getTrackGroups(1);
+        DefaultTrackSelector.ParametersBuilder parametersBuilder = trackSelector.buildUponParameters();
+        DefaultTrackSelector.SelectionOverride override = new DefaultTrackSelector.SelectionOverride(index, 0);
+        boolean isDisabled = trackSelector.getParameters().getRendererDisabled(1);
+        parametersBuilder.setRendererDisabled(1, isDisabled);
+        if (override != null) {
+            parametersBuilder.setSelectionOverride(1, trackGroups, override);
+        }
+        else {
+            parametersBuilder.clearSelectionOverrides(1);
+        }
+        trackSelector.setParameters(parametersBuilder);
+    }
+
     public void getSubtitles(){
         String[] st = new String []{};
         List<String> list = new ArrayList<String>();
